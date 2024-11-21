@@ -87,5 +87,6 @@ This action supports all [AWS CLI `s3 sync` flags](https://docs.aws.amazon.com/c
 ---
 
 ## 📜 License
+This project is a fork of [s3-sync-action] by [jakejarvis], licensed under the MIT License.
 
 This project is licensed under the [MIT License](LICENSE.md).
