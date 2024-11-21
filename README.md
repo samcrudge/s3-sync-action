@@ -1,63 +1,72 @@
-# GitHub Action to Sync S3 Bucket 🔄
 
-This simple action uses the [vanilla AWS CLI](https://docs.aws.amazon.com/cli/index.html) to sync a directory (either from your repository or generated during your workflow) with a remote S3 bucket.
+# GitHub Action: Sync with S3 Bucket 🔄
 
+This GitHub Action uses the [AWS CLI](https://docs.aws.amazon.com/cli/index.html) to sync a local directory (from your repository or generated during your workflow) with an S3 bucket. It is designed to be simple, secure, and highly customizable to suit various use cases.
 
-## Usage
+---
 
-### `workflow.yml` Example
+## 🚀 Usage
 
-Place in a `.yml` file such as this one in your `.github/workflows` folder. [Refer to the documentation on workflow YAML syntax here.](https://help.github.com/en/articles/workflow-syntax-for-github-actions)
+### Example Workflow: `workflow.yml`
 
-As of v0.3.0, all [`aws s3 sync` flags](https://docs.aws.amazon.com/cli/latest/reference/s3/sync.html) are optional to allow for maximum customizability (that's a word, I promise) and must be provided by you via `args:`.
-
-#### The following example includes optimal defaults for a public static website:
-
-- `--acl public-read` makes your files publicly readable (make sure your [bucket settings are also set to public](https://docs.aws.amazon.com/AmazonS3/latest/dev/WebsiteAccessPermissionsReqd.html)).
-- `--follow-symlinks` won't hurt and fixes some weird symbolic link problems that may come up.
-- Most importantly, `--delete` **permanently deletes** files in the S3 bucket that are **not** present in the latest version of your repository/build.
-- **Optional tip:** If you're uploading the root of your repository, adding `--exclude '.git/*'` prevents your `.git` folder from syncing, which would expose your source code history if your project is closed-source. (To exclude more than one pattern, you must have one `--exclude` flag per exclusion. The single quotes are also important!)
+Place a `.yml` file like the following in your `.github/workflows` folder. For additional details, see the [workflow syntax documentation](https://help.github.com/en/articles/workflow-syntax-for-github-actions).
 
 ```yaml
-name: Upload Website
+name: Deploy to S3
 
 on:
   push:
     branches:
-    - master
+      - main
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@master
-    - uses: jakejarvis/s3-sync-action@master
-      with:
-        args: --acl public-read --follow-symlinks --delete
-      env:
-        AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        AWS_REGION: 'us-west-1'   # optional: defaults to us-east-1
-        SOURCE_DIR: 'public'      # optional: defaults to entire repository
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Sync to S3
+        uses: <your-username>/<your-action>@main
+        with:
+          args: --acl public-read --follow-symlinks --delete
+        env:
+          AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
+          AWS_REGION: us-west-2 # Optional: Defaults to us-east-1
+          SOURCE_DIR: public    # Optional: Defaults to the root of the repository
+          DEST_DIR: assets      # Optional: Defaults to the root of the S3 bucket
 ```
 
+### Key Features
+- **Public Website Hosting**: Use `--acl public-read` to make files publicly accessible (ensure your bucket settings allow public access).
+- **Symbolic Links**: Fix potential symbolic link issues with `--follow-symlinks`.
+- **Sync Optimization**: Use `--delete` to remove files in the bucket that aren't in the source directory.
+- **Exclusions**: Exclude sensitive or unnecessary files like `.git` using `--exclude`.
 
-### Configuration
+---
 
-The following settings must be passed as environment variables as shown in the example. Sensitive information, especially `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`, should be [set as encrypted secrets](https://help.github.com/en/articles/virtual-environments-for-github-actions#creating-and-using-secrets-encrypted-variables) — otherwise, they'll be public to anyone browsing your repository's source code and CI logs.
+## ⚙️ Configuration
 
-| Key | Value | Suggested Type | Required | Default |
-| ------------- | ------------- | ------------- | ------------- | ------------- |
-| `AWS_ACCESS_KEY_ID` | Your AWS Access Key. [More info here.](https://docs.aws.amazon.com/general/latest/gr/managing-aws-access-keys.html) | `secret env` | **Yes** | N/A |
-| `AWS_SECRET_ACCESS_KEY` | Your AWS Secret Access Key. [More info here.](https://docs.aws.amazon.com/general/latest/gr/managing-aws-access-keys.html) | `secret env` | **Yes** | N/A |
-| `AWS_S3_BUCKET` | The name of the bucket you're syncing to. For example, `jarv.is` or `my-app-releases`. | `secret env` | **Yes** | N/A |
-| `AWS_REGION` | The region where you created your bucket. Set to `us-east-1` by default. [Full list of regions here.](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html#concepts-available-regions) | `env` | No | `us-east-1` |
-| `AWS_S3_ENDPOINT` | The endpoint URL of the bucket you're syncing to. Can be used for [VPC scenarios](https://aws.amazon.com/blogs/aws/new-vpc-endpoint-for-amazon-s3/) or for non-AWS services using the S3 API, like [DigitalOcean Spaces](https://www.digitalocean.com/community/tools/adapting-an-existing-aws-s3-application-to-digitalocean-spaces). | `env` | No | Automatic (`s3.amazonaws.com` or AWS's region-specific equivalent) |
-| `SOURCE_DIR` | The local directory (or file) you wish to sync/upload to S3. For example, `public`. Defaults to your entire repository. | `env` | No | `./` (root of cloned repository) |
-| `DEST_DIR` | The directory inside of the S3 bucket you wish to sync/upload to. For example, `my_project/assets`. Defaults to the root of the bucket. | `env` | No | `/` (root of bucket) |
+Set the following environment variables in your workflow to configure the action. Sensitive data like AWS credentials should be stored as [encrypted secrets](https://docs.github.com/en/actions/security-guides/encrypted-secrets).
 
+| Variable                | Description                                                                                       | Required | Default         |
+|-------------------------|---------------------------------------------------------------------------------------------------|----------|-----------------|
+| `AWS_S3_BUCKET`         | The name of the S3 bucket to sync with.                                                          | **Yes**  | N/A             |
+| `AWS_REGION`            | The AWS region where the S3 bucket is located.                                                   | No       | `us-east-1`     |
+| `SOURCE_DIR`            | The local directory to upload.                                                                   | No       | `./` (repository root) |
+| `DEST_DIR`              | The target directory in the S3 bucket.                                                           | No       | `/` (bucket root) |
 
-## License
+### Using IAM Roles for Authentication
+If your GitHub Actions runner has an IAM role configured, the action will use it automatically, avoiding the need for `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`.
 
-This project is distributed under the [MIT license](LICENSE.md).
+---
+
+## 🛠 Customization
+
+This action supports all [AWS CLI `s3 sync` flags](https://docs.aws.amazon.com/cli/latest/reference/s3/sync.html). Add custom flags in the `args:` input of the workflow.
+
+---
+
+## 📜 License
+
+This project is licensed under the [MIT License](LICENSE.md).
