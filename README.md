@@ -64,6 +64,25 @@ If your GitHub Actions runner has an IAM role configured, the action will use it
 ## 🛠 Customization
 
 This action supports all [AWS CLI `s3 sync` flags](https://docs.aws.amazon.com/cli/latest/reference/s3/sync.html). Add custom flags in the `args:` input of the workflow.
+| **Flag**                | **Description**                                                                                   | **Use Case**                                                                                          |
+|-------------------------|---------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------|
+| `--acl <value>`         | Specifies the ACL (Access Control List) for uploaded objects. Common values: `public-read`.      | Use for making files publicly readable, such as for hosting a static website.                        |
+| `--delete`              | Deletes files in the destination bucket that are not present in the source directory.            | Keeps the bucket clean by removing obsolete files.                                                   |
+| `--dry-run`             | Simulates the operation without making any changes.                                              | Test and verify what will happen during the sync.                                                    |
+| `--exclude <pattern>`   | Excludes files that match the specified pattern. Can be repeated for multiple exclusions.         | Prevents syncing unnecessary files (e.g., `.git/*`, temporary files).                                |
+| `--include <pattern>`   | Includes files that match the specified pattern (overrides exclusions).                          | Ensures specific files are included even if they match exclusion patterns.                           |
+| `--follow-symlinks`     | Follows symbolic links and syncs the target files or directories.                                 | Fixes issues with symbolic links in your source directory.                                           |
+| `--exact-timestamps`    | Ensures the timestamps of synced files match exactly.                                            | Useful for preserving precise timestamps between source and destination.                             |
+| `--storage-class <class>`| Specifies the storage class for uploaded files. Examples: `STANDARD`, `REDUCED_REDUNDANCY`.      | Helps reduce costs by specifying lower-cost storage options if appropriate.                          |
+| `--quiet`               | Suppresses most output messages.                                                                 | Use for cleaner logs during automated deployments.                                                   |
+| `--no-progress`         | Disables the progress bar in the output.                                                         | Makes logs less cluttered, especially in CI environments.                                            |
+| `--size-only`           | Compares files only based on size, ignoring timestamps.                                          | Speeds up syncs when file sizes are more reliable than timestamps for determining changes.            |
+| `--exact-timestamps`    | Ensures the timestamps of synced files match exactly.                                            | Useful for preserving precise timestamps between source and destination.                             |
+| `--endpoint-url <url>`  | Specifies a custom endpoint URL, such as for non-AWS S3-compatible services.                     | Use for services like DigitalOcean Spaces or MinIO.                                                  |
+| `--region <region>`     | Specifies the AWS region for the bucket.                                                         | Ensures the sync operation targets the correct bucket region.                                         |
+| `--only-show-errors`    | Shows only error messages and suppresses other output.                                           | Helps minimize output noise while still showing critical issues.                                      |
+| `--source-region <region>`| Specifies the AWS region for the source bucket if syncing between two S3 buckets.               | Ensures correct source region is used in cross-region syncs.                                          |
+
 
 ---
 
