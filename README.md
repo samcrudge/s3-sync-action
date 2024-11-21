@@ -27,7 +27,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Sync to S3
-        uses: <your-username>/<your-action>@main
+        uses: samcrudge/s3-sync-action@main
         with:
           args: --acl public-read --follow-symlinks --delete
         env:
