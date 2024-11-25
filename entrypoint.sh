@@ -5,13 +5,11 @@ set -e
 # Function to handle errors and display meaningful messages
 handle_error() {
   echo "Error occurred in script at line: $1"
-  echo "Command: $2"
-  echo "Exiting with status: $3"
-  exit $3
+  exit $2
 }
 
 # Trap errors and pass them to the error handler
-trap 'handle_error ${LINENO} "$BASH_COMMAND" $?' ERR
+trap 'handle_error ${LINENO} $?' ERR
 
 # Ensure required environment variables are set
 if [ -z "$AWS_S3_BUCKET" ]; then
