@@ -10,7 +10,7 @@ LABEL repository="https://github.com/samcrudge/s3-sync-action"
 LABEL maintainer="Sam Crudge <scrudge@shopware.com>"
 
 # https://github.com/aws/aws-cli/blob/master/CHANGELOG.rst
-ENV AWSCLI_VERSION='2.13.24'
+ENV AWSCLI_VERSION='1.36.9'
 
 RUN pip install --quiet --no-cache-dir awscli==${AWSCLI_VERSION}
 
